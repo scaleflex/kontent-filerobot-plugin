@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.73/filerobot-widget.min.css?func=proxy" />
+    <!-- https://kontent.ai/learn/tutorials/develop-apps/integrate/content-editing-extensions -->
+    <script src="https://app.kontent.ai/js-api/custom-element/v1/custom-element.min.js"></script>
+  </head>
+  <body>
+    <div id="filerobot-widget"></div>
+    <script src="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.73/filerobot-widget.min.js?func=proxy"></script>
+    <script>
+      var uploaderInstance = null;
+      var Filerobot = window.Filerobot;
+      var isDisabled = false;
+      
+      function initializeUploader(initialValue, isDisabled, config = {}) {
+          uploaderInstance = Filerobot.Core({
+            securityTemplateID : config.sec_tmp,
+            container          : config.token,
+          });
+
+          var Explorer    = Filerobot.Explorer;
+          var XHRUpload   = Filerobot.XHRUpload;
+          var ImageEditor = Filerobot.ImageEditor;
+          var Webcam      = Filerobot.Webcam;
+
+          uploaderInstance
+            .use(Explorer, {
+              config: {
+                rootFolderPath: config.dir
+              },
+              target : '#filerobot-widget',
+              inline : true,
+              width  : 10000,
+              height : 1000,
+            })
+            .use(XHRUpload)
+            .on('complete', ({ failed, uploadID, successful }) => {
+              console.dir(failed);
+              console.dir(uploadID);
+              console.dir(successful);
+
+              if (successful)
+              {
+                setValue(successful);
+                updateSize();
+              }
+            });
+        
+          // Reacts to window resize to adjust the height
+          window.addEventListener('resize', updateSize);
+      }
+      
+      // https://kontent.ai/learn/reference/custom-elements-js-api/#a-setvalue-method
+      function setValue(images) {
+        if (!isDisabled) {
+          if (images && images.length) {
+            CustomElement.setValue(JSON.stringify(images));
+            //renderSelected(images);
+          } else {
+            CustomElement.setValue(null);
+            //renderSelected(null);
+          }
+        }
+        CustomElement.setValue(value);
+      }
+
+      function updateSize() {
+          // Updates the custom element height in the Kontent UI.
+          const height = Math.ceil($("html").height());
+          CustomElement.setHeight(height);
+      }
+
+      // function renderSelected(images) {
+      //   const $selected = $(".selected").empty();
+      //   const $titleText = $(".title").find(".text");
+      //   const $clear = $(".btn--destructive").hide();
+
+      //   if (images && images.length) {
+      //     $titleText.text("Selected images");
+      //     $titleText.addClass("title--selected");
+      //     $clear.show();
+
+      //     for (var i = 0; i < images.length; i++) {
+      //       const image = images[i];
+      //       if (image && image.uuid) {
+      //         imageTile($selected, image);
+      //       }
+      //     }
+      //   } else {
+      //     $titleText.text("No assets selected");
+      //     $titleText.removeClass("title--selected");
+      //   }
+
+      //   updateSize();
+      // }
+
+      // function imageTile($parent, item) {
+      //   const $tile = $(
+      //     `<div class="tile" title="${item.public_id}"></div>`
+      //   ).appendTo($parent);
+
+      //   const $actions = $('<div class="actions"></div>').appendTo($tile);
+
+      //   $(
+      //     `<div class="action remove" title="Remove"><i class="icon-remove"></i></div>`
+      //   )
+      //     .appendTo($actions)
+      //     .click(function () {
+      //       remove(item.public_id);
+      //     });
+
+      //   if (item.secure_url) {
+      //     const $preview = $('<div class="preview"></div>').appendTo($tile);
+
+      //     $('<img draggable="false" class="thumbnail" />')
+      //       .attr("src", item.secure_url)
+      //       .appendTo($preview)
+      //       .on("load", updateSize);
+      //   } else {
+      //     $('<div class="noimage">No image available</div>').appendTo($tile);
+      //   }
+
+      //   const $info = $(`<div class="info"></div>`).appendTo($tile);
+      //   $(`<div class="name">${item.public_id}</div>`).appendTo($info);
+
+      //   updateSize();
+      // }
+
+      function initCustomElement() {
+          try {
+              CustomElement.init((element, _context) => {
+                config = element.config || {};
+                console.dir(config.token);
+                console.dir(config.sec_tmp);
+                console.dir(config.dir);
+                // Sets up editor with initial value, state (whether disabled) , and configuration options
+                initializeUploader(element.value, element.disabled, element.config);
+                updateSize();
+              });
+          } catch (err) {
+              // Sends message to console and editor if initialization failed (for example, the page is displayed outside the Kontent UI)
+              console.error(err);
+              initializeUploader(err.toString());
+          }
+      }
+
+      initCustomElement();
+    </script>
+  </body>
+</html>
