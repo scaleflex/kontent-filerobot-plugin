@@ -7,6 +7,53 @@
 
     <link rel="stylesheet" type="text/css" href="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.73/filerobot-widget.min.css?func=proxy" />
 
+    <style>
+      .selected {
+        margin-top: 20px;
+      }
+      .tile {
+        position: relative;
+        height: 224px;
+        width: 30%;
+        cursor: pointer;
+        background-color: #f5f5f5;
+        border-radius: 2px;
+        box-shadow: 0 1px 3px 1px rgb(0 0 0 / 20%);
+        transition: all 0.15s cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+        display: inline-block;
+        overflow: hidden;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+      .tile .preview .thumbnail {
+        max-width: 100%;
+        max-height: 100%;
+        vertical-align: middle;
+        border: 0;
+      }
+      .tile .info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        width: 100%;
+        background-color: hsla(0, 0%, 96.1%, 0.8);
+        border-bottom-right-radius: 2px;
+        border-bottom-left-radius: 2px;
+        transition: all 0.15s cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+        padding: 8px;
+      }
+      .tile .info .name {
+        display: block;
+        width: 100%;
+        margin-bottom: 4px;
+        font-size: 14px;
+        line-height: 1.25;
+        word-wrap: break-word;
+        white-space: nowrap;
+      }
+    </style>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <!-- https://kontent.ai/learn/tutorials/develop-apps/integrate/content-editing-extensions -->
@@ -25,50 +72,52 @@
       var Filerobot = window.Filerobot;
       
       function initializeUploader(config = {}) {
-          uploaderInstance = Filerobot.Core({
-            securityTemplateID : config.sec_tmp,
-            container          : config.token,
-          });
+        uploaderInstance = Filerobot.Core({
+          securityTemplateID : config.sec_tmp,
+          container          : config.token,
+        });
 
-          var Explorer    = Filerobot.Explorer;
-          var XHRUpload   = Filerobot.XHRUpload;
-          var ImageEditor = Filerobot.ImageEditor;
-          var Webcam      = Filerobot.Webcam;
+        var Explorer    = Filerobot.Explorer;
+        var XHRUpload   = Filerobot.XHRUpload;
+        var ImageEditor = Filerobot.ImageEditor;
+        var Webcam      = Filerobot.Webcam;
 
-          uploaderInstance
-            .use(Explorer, {
-              config: {
-                rootFolderPath: config.dir
-              },
-              target : '#filerobot-widget',
-              inline : true,
-            })
-            .use(XHRUpload)
-            .on('complete', ({ failed, uploadID, successful }) => {
-              if (successful)
-              {
-                var media = [];
-
-                successful.forEach((file, index) => {
-                  media.push(file.url.cdn);
-                });
-
-                setValue(media);
-                updateSize();
-              }
-            })
-            .on('export', (files, popupExportSucessMsgFn, downloadFilesPackagedFn, downloadFileFn) => {
+        uploaderInstance
+          .use(Explorer, {
+            config: {
+              rootFolderPath: config.dir
+            },
+            target : '#filerobot-widget',
+            inline : true,
+          })
+          .use(XHRUpload)
+          .on('complete', ({failed, uploadID, successful}) => {
+            console.dir(successful);
+            if (successful)
+            {
               var media = [];
 
-              files.forEach((file, index) => {
-                media.push(file.link);
+              successful.forEach((file, index) => {
+                media.push({url: file.url.cdn, name: file.name, uuid: file.uuid});
               });
 
               setValue(media);
               updateSize();
+            }
+          })
+          .on('export', (files, popupExportSucessMsgFn, downloadFilesPackagedFn, downloadFileFn) => {
+            console.dir(files);
+            var media = [];
+
+            files.forEach((file, index) => {
+              media.push({url: file.link, name: file.file.name, uuid: file.file.uuid});
             });
-        
-          window.addEventListener('resize', updateSize);
+
+            setValue(media);
+            updateSize();
+          });
+      
+        window.addEventListener('resize', updateSize);
       }
       
       // https://kontent.ai/learn/reference/custom-elements-js-api/#a-setvalue-method
@@ -109,34 +158,37 @@
 
       function imageTile(parent, item) 
       {
-        const $tile = $(
+        var tile = $(
           `<div class="tile"></div>`
         ).appendTo(parent);
 
-        const $preview = $('<div class="preview"></div>').appendTo($tile);
+        var preview = $('<div class="preview"></div>').appendTo(tile);
 
         $('<img draggable="false" class="thumbnail" />')
-          .attr("src", item)
-          .appendTo($preview)
+          .attr("src", item.url)
+          .appendTo(preview)
           .on("load", updateSize);
+
+        var info = $(`<div class="info"></div>`).appendTo(tile);
+        $(`<div class="name">${item.name}</div>`).appendTo(info);
 
         updateSize();
       }
 
       function initCustomElement() 
       {
-          try 
-          {
-              CustomElement.init((element, _context) => {
-                config = element.config || {};
-                initializeUploader(element.config);
-                updateSize();
-              });
-          } 
-          catch (err) 
-          {
-              console.error(err);
-          }
+        try 
+        {
+          CustomElement.init((element, _context) => {
+            config = element.config || {};
+            initializeUploader(element.config);
+            updateSize();
+          });
+        } 
+        catch (err) 
+        {
+          console.error(err);
+        }
       }
 
       initCustomElement();
