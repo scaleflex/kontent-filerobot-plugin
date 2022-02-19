@@ -7,7 +7,16 @@
 
     <link rel="stylesheet" type="text/css" href="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.73/filerobot-widget.min.css?func=proxy" />
 
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+
     <style>
+      .btn--destructive {
+        color: #757575;
+        background-color: transparent;
+        border-color: #757575;
+        margin-top: 20px;
+      }
       .selected {
         margin-top: 20px;
       }
@@ -52,6 +61,24 @@
         word-wrap: break-word;
         white-space: nowrap;
       }
+      .tile .actions {
+        position: absolute;
+        top: 0;
+        z-index: 100;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: flex-end;
+        justify-content: flex-end;
+        width: 100%;
+        cursor: default;
+        background-color: hsla(0, 0%, 96.1%, 0.85);
+      }
+      .tile .actions .action i {
+        padding: 8px 10px;
+        font-size: 16px;
+        color: #424242;
+        cursor: pointer;
+      }
     </style>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -61,6 +88,11 @@
   </head>
   <body>
     <div id="filerobot-widget"></div>
+
+    <button class="clear btn btn--destructive" type="button">
+      <i class="icon-clear-filter btn__icon" aria-hidden="true"></i>
+      <span>Clear</span>
+    </button>
     <div class="selected"></div>
 
     <!-- https://www.npmjs.com/package/@filerobot/explorer#filerobotexplorer -->
@@ -69,8 +101,15 @@
     <script>
     (function($){
       var uploaderInstance = null;
-      var Filerobot = window.Filerobot;
-      
+      var Filerobot        = window.Filerobot;
+      var currentValue     = null;
+      var clearBtn         = $(".clear.btn--destructive");
+
+      clearBtn.hide();
+      clearBtn.click(function () {
+        setValue(null);
+      });
+
       function initializeUploader(config = {}) {
         uploaderInstance = Filerobot.Core({
           securityTemplateID : config.sec_tmp,
@@ -125,11 +164,13 @@
       {
         if (images && images.length) 
         {
+          currentValue = images;
           CustomElement.setValue(JSON.stringify(images));
           renderSelected(images);
         } 
         else 
         {
+          currentValue = null;
           CustomElement.setValue(null);
           renderSelected(null);
         }
@@ -144,9 +185,12 @@
       function renderSelected(images) 
       {
         const selected = $(".selected").empty();
+        clearBtn.hide();
 
         if (images && images.length) 
         {
+          clearBtn.show();
+
           for (var i = 0; i < images.length; i++) 
           {
             imageTile(selected, images[i]);
@@ -159,8 +203,16 @@
       function imageTile(parent, item) 
       {
         var tile = $(
-          `<div class="tile"></div>`
+          `<div class="tile" title="${item.uuid}"></div>`
         ).appendTo(parent);
+
+        var actions = $('<div class="actions"></div>').appendTo(tile);
+
+        $(`<div class="action remove" title="Remove"><i class="icon-remove"></i></div>`)
+          .appendTo(actions)
+          .click(function () {
+            remove(item.uuid);
+          });
 
         var preview = $('<div class="preview"></div>').appendTo(tile);
 
@@ -173,6 +225,14 @@
         $(`<div class="name">${item.name}</div>`).appendTo(info);
 
         updateSize();
+      }
+
+      function remove(uuid) 
+      {
+        var images = currentValue || [];
+        var newImages = images.filter((image) => image.uuid !== uuid);
+
+        setValue(newImages);
       }
 
       function initCustomElement() 
