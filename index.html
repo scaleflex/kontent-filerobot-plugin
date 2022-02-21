@@ -235,6 +235,21 @@
         setValue(newImages);
       }
 
+      function initializeSelected(value) 
+      {
+        if (value) 
+        {
+          currentValue = JSON.parse(value);
+          renderSelected(currentValue);
+        } 
+        else 
+        {
+          renderSelected(null);
+        }
+
+        window.addEventListener("resize", updateSize);
+      }
+
       function initCustomElement() 
       {
         try 
@@ -242,6 +257,7 @@
           CustomElement.init((element, _context) => {
             config = element.config || {};
             initializeUploader(element.config);
+            initializeSelected(element.value);
             updateSize();
           });
         } 
