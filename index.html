@@ -103,12 +103,37 @@
       var uploaderInstance = null;
       var Filerobot        = window.Filerobot;
       var currentValue     = null;
+      var isDisabled       = true;
       var clearBtn         = $(".clear.btn--destructive");
+      var frWidget         = $("#filerobot-widget");
 
       clearBtn.hide();
       clearBtn.click(function () {
         setValue(null);
       });
+
+      function updateDisabled(disabled) 
+      {
+        if (disabled) 
+        {
+          frWidget.hide();
+          clearBtn.hide();
+          $('.action.remove').each(function(index) {
+            $(this).hide();
+          });
+        } 
+        else 
+        {
+          frWidget.show();
+          clearBtn.show();
+          $('.action.remove').each(function(index) {
+            $(this).show();
+          });
+        }
+
+        isDisabled = disabled;
+        updateSize();
+      }
 
       function initializeUploader(config = {}) {
         uploaderInstance = Filerobot.Core({
@@ -178,8 +203,11 @@
 
       function updateSize() 
       {
-          const height = Math.ceil($("html").height());
-          CustomElement.setHeight(height);
+        var height = isDisabled
+          ? Math.ceil($("html").height())
+          : window.screen.height - 300;
+
+        CustomElement.setHeight(height);
       }
 
       function renderSelected(images) 
@@ -258,12 +286,17 @@
             config = element.config || {};
             initializeUploader(element.config);
             initializeSelected(element.value);
+            updateDisabled(element.disabled);
             updateSize();
           });
+
+          // Reacts to changes in disabling (e.g., when publishing the item)
+          CustomElement.onDisabledChanged(updateDisabled);
         } 
         catch (err) 
         {
           console.error(err);
+          updateDisabled(true);
         }
       }
 
