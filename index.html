@@ -1,307 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Custom Element Filerobot</title>
+    <link rel="stylesheet" type="text/css"
+          href="https://scaleflex.cloudimg.io/v7/plugins/filerobot-widget/latest/filerobot-widget.min.css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="relative">
+<div id="messageWrapper" class="w-full px-2 py-1.5 border text-gray-600 border-red-500 bg-red-50 shadow flex justify-start space-x-2 rounded hidden">
+    <span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+        </svg>
+    </span>
+    <span id="message"></span>
+</div>
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.105/filerobot-widget.min.css?func=proxy" />
+<button id="filerobotOpenModalBtn" class="flex justify-start space-x-2 border bg-gray-100 px-2 py-1.5 my-4 mx-4 rounded-lg shadow-md hover:text-indigo-600 hover:shadow">
+    <span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+    </span>
+    <span>Add Assets</span>
+</button>
+<div id="filerobotImages" class="grid grid-cols-6 gap-3 my-5  mx-4"></div>
+<div id="filerobotWidgetWrapper" class="absolute top-0 w-full p-1 bg-gray-50 rounded hidden">
+    <div class="flex justify-end">
+        <button class="sticky z-50" id="filerobotCloseModalBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-500 hover:text-gray-800">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+    <div class="z-40 mx-auto ml-2 pb-3 rounded" id="filerobotWidget"></div>
+</div>
 
-    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
-    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
-
-    <style>
-      .btn--destructive {
-        color: #757575;
-        background-color: transparent;
-        border-color: #757575;
-        margin-top: 20px;
-      }
-      .selected {
-        margin-top: 20px;
-      }
-      .tile {
-        position: relative;
-        height: 224px;
-        width: 30%;
-        cursor: pointer;
-        background-color: #f5f5f5;
-        border-radius: 2px;
-        box-shadow: 0 1px 3px 1px rgb(0 0 0 / 20%);
-        transition: all 0.15s cubic-bezier(0.23, 1, 0.32, 1) 0ms;
-        display: inline-block;
-        overflow: hidden;
-        margin-right: 10px;
-        margin-bottom: 10px;
-      }
-      .tile .preview .thumbnail {
-        max-width: 100%;
-        max-height: 100%;
-        vertical-align: middle;
-        border: 0;
-      }
-      .tile .info {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        display: flex;
-        width: 100%;
-        background-color: hsla(0, 0%, 96.1%, 0.8);
-        border-bottom-right-radius: 2px;
-        border-bottom-left-radius: 2px;
-        transition: all 0.15s cubic-bezier(0.23, 1, 0.32, 1) 0ms;
-        padding: 8px;
-      }
-      .tile .info .name {
-        display: block;
-        width: 100%;
-        margin-bottom: 4px;
-        font-size: 14px;
-        line-height: 1.25;
-        word-wrap: break-word;
-        white-space: nowrap;
-      }
-      .tile .actions {
-        position: absolute;
-        top: 0;
-        z-index: 100;
-        display: -webkit-flex;
-        display: flex;
-        -webkit-justify-content: flex-end;
-        justify-content: flex-end;
-        width: 100%;
-        cursor: default;
-        background-color: hsla(0, 0%, 96.1%, 0.85);
-      }
-      .tile .actions .action i {
-        padding: 8px 10px;
-        font-size: 16px;
-        color: #424242;
-        cursor: pointer;
-      }
-    </style>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-    <!-- https://kontent.ai/learn/tutorials/develop-apps/integrate/content-editing-extensions -->
-    <script src="https://app.kontent.ai/js-api/custom-element/v1/custom-element.min.js"></script>
-  </head>
-  <body>
-    <div id="filerobot-widget"></div>
-
-    <button class="clear btn btn--destructive" type="button">
-      <i class="icon-clear-filter btn__icon" aria-hidden="true"></i>
-      <span>Clear</span>
-    </button>
-    <div class="selected"></div>
-
-    <!-- https://www.npmjs.com/package/@filerobot/explorer#filerobotexplorer -->
-    <!-- https://www.npmjs.com/package/@filerobot/core#events -->
-    <script src="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.105/filerobot-widget.min.js?func=proxy"></script>
-    <script>
-    (function($){
-      var uploaderInstance = null;
-      var Filerobot        = window.Filerobot;
-      var currentValue     = null;
-      var isDisabled       = true;
-      var clearBtn         = $(".clear.btn--destructive");
-      var frWidget         = $("#filerobot-widget");
-
-      clearBtn.hide();
-      clearBtn.click(function () {
-        setValue(null);
-      });
-
-      function updateDisabled(disabled) 
-      {
-        if (disabled) 
-        {
-          frWidget.hide();
-          clearBtn.hide();
-          $('.action.remove').each(function(index) {
-            $(this).hide();
-          });
-        } 
-        else 
-        {
-          frWidget.show();
-          clearBtn.show();
-          $('.action.remove').each(function(index) {
-            $(this).show();
-          });
-        }
-
-        isDisabled = disabled;
-        updateSize();
-      }
-
-      function initializeUploader(config = {}) {
-        uploaderInstance = Filerobot.Core({
-          securityTemplateID : config.sec_tmp,
-          container          : config.token,
-        });
-
-        var Explorer    = Filerobot.Explorer;
-        var XHRUpload   = Filerobot.XHRUpload;
-        var ImageEditor = Filerobot.ImageEditor;
-        var Webcam      = Filerobot.Webcam;
-
-        uploaderInstance
-          .use(Explorer, {
-            config: {
-              rootFolderPath: config.dir
-            },
-            target : '#filerobot-widget',
-            inline : true,
-          })
-          .use(XHRUpload)
-          .on('complete', ({failed, uploadID, successful}) => {
-            console.dir(successful);
-            if (successful)
-            {
-              var media = [];
-
-              successful.forEach((file, index) => {
-                media.push({url: file.url.cdn, name: file.name, uuid: file.uuid});
-              });
-
-              setValue(media);
-              updateSize();
-            }
-          })
-          .on('export', (files, popupExportSucessMsgFn, downloadFilesPackagedFn, downloadFileFn) => {
-            console.dir(files);
-            var media = [];
-
-            files.forEach((file, index) => {
-              media.push({url: file.link, name: file.file.name, uuid: file.file.uuid});
-            });
-
-            setValue(media);
-            updateSize();
-          });
-      
-        window.addEventListener('resize', updateSize);
-      }
-      
-      // https://kontent.ai/learn/reference/custom-elements-js-api/#a-setvalue-method
-      function setValue(images) 
-      {
-        if (images && images.length) 
-        {
-          currentValue = images;
-          CustomElement.setValue(JSON.stringify(images));
-          renderSelected(images);
-        } 
-        else 
-        {
-          currentValue = null;
-          CustomElement.setValue(null);
-          renderSelected(null);
-        }
-      }
-
-      function updateSize() 
-      {
-        var height = isDisabled
-          ? Math.ceil($("html").height())
-          : window.screen.height - 300;
-
-        CustomElement.setHeight(height);
-      }
-
-      function renderSelected(images) 
-      {
-        const selected = $(".selected").empty();
-        clearBtn.hide();
-
-        if (images && images.length) 
-        {
-          clearBtn.show();
-
-          for (var i = 0; i < images.length; i++) 
-          {
-            imageTile(selected, images[i]);
-          }
-        } 
-
-        updateSize();
-      }
-
-      function imageTile(parent, item) 
-      {
-        var tile = $(
-          `<div class="tile" title="${item.uuid}"></div>`
-        ).appendTo(parent);
-
-        var actions = $('<div class="actions"></div>').appendTo(tile);
-
-        $(`<div class="action remove" title="Remove"><i class="icon-remove"></i></div>`)
-          .appendTo(actions)
-          .click(function () {
-            remove(item.uuid);
-          });
-
-        var preview = $('<div class="preview"></div>').appendTo(tile);
-
-        $('<img draggable="false" class="thumbnail" />')
-          .attr("src", item.url)
-          .appendTo(preview)
-          .on("load", updateSize);
-
-        var info = $(`<div class="info"></div>`).appendTo(tile);
-        $(`<div class="name">${item.name}</div>`).appendTo(info);
-
-        updateSize();
-      }
-
-      function remove(uuid) 
-      {
-        var images = currentValue || [];
-        var newImages = images.filter((image) => image.uuid !== uuid);
-
-        setValue(newImages);
-      }
-
-      function initializeSelected(value) 
-      {
-        if (value) 
-        {
-          currentValue = JSON.parse(value);
-          renderSelected(currentValue);
-        } 
-        else 
-        {
-          renderSelected(null);
-        }
-
-        window.addEventListener("resize", updateSize);
-      }
-
-      function initCustomElement() 
-      {
-        try 
-        {
-          CustomElement.init((element, _context) => {
-            config = element.config || {};
-            initializeUploader(element.config);
-            initializeSelected(element.value);
-            updateDisabled(element.disabled);
-            updateSize();
-          });
-
-          // Reacts to changes in disabling (e.g., when publishing the item)
-          CustomElement.onDisabledChanged(updateDisabled);
-        } 
-        catch (err) 
-        {
-          console.error(err);
-          updateDisabled(true);
-        }
-      }
-
-      initCustomElement();
-    })(jQuery); 
-    </script>
-  </body>
+<script src="https://app.kontent.ai/js-api/custom-element/v1/custom-element.min.js"></script>
+<script type="text/javascript"
+        src="https://scaleflex.cloudimg.io/v7/plugins/filerobot-widget/latest/filerobot-widget.min.js"></script>
+<script type="module" src="/main.js"></script>
+</body>
 </html>
