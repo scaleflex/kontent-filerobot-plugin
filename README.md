@@ -27,8 +27,8 @@ This [custom element](https://kontent.ai/learn/tutorials/develop-apps/integrate/
   - Link selected assets with their content items with preview directly inside of the Kontent.ai editor
 
 ## Demo
-
-![Demo][product-demo]
+Request to Us
+[Demo][product-demo]
 
 ## Getting started
 
