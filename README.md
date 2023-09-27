@@ -28,7 +28,7 @@ This [custom element](https://kontent.ai/learn/tutorials/develop-apps/integrate/
 
 ## Demo
 
-![Demo Animation][product-demo]
+![Demo][product-demo]
 
 ## Getting started
 
@@ -96,4 +96,4 @@ We have collected notes on how to contribute to this project in [CONTRIBUTING.md
 
 
 [contributors-url]: https://github.com/scaleflex/kontent-filerobot-plugin/graphs/contributors
-[product-demo]: docs/filerobot.gif
+[product-demo]: https://www.scaleflex.com/request-a-demo
