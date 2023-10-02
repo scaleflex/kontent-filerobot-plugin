@@ -81,13 +81,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     },
                     target: '#filerobotWidget',
                     inline: true,
-                    width: '99%',
-                    height: '500px',
-                    disableExportButton: false,
-                    hideExportButtonIcon: true,
-                    preventExportDefaultBehavior: true,
+                    width: "100%",
+                    height: "100%",
+                    disableDownloadButton: true,
+                    hideDownloadButtonIcon: true,
+                    preventDownloadDefaultBehavior: true,
                     resetAfterClose: true,
-                    dismissUrlPathQueryUpdate: true,
                      // reference https://github.com/scaleflex/commercetools-filerobot-plugin/blob/master/src/components/filerobot/filerobot-dam.jsx
                      locale: {
                         strings: {
