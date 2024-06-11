@@ -30,12 +30,19 @@ function buildHtml(selected) {
     const divElement = document.createElement('div');
     divElement.classList = "rounded p-2 border shadow relative removeItemParent";
     divElement.setAttribute("data-uuid", selected.file.uuid);
-
-    const imgElement = document.createElement('img');
-    imgElement.src = assetUrl + '&width=200&height=200';
-    imgElement.classList = "w-32 h-32 mx-auto rounded";
-    divElement.appendChild(imgElement);
-
+    const type =  selected.file.type.split("/")[0];
+    if (type == 'image') {
+        const imgElement = document.createElement('img');
+        imgElement.src = assetUrl + '&width=200&height=200';
+        imgElement.classList = "w-32 h-32 mx-auto rounded";
+        divElement.appendChild(imgElement);
+    } else {
+        const divTypeElement = document.createElement('div');
+        divTypeElement.innerHTML =  selected.file.type;
+        divTypeElement.classList = "w-32 h-32 mx-auto rounded";
+        divElement.appendChild(divTypeElement);
+    }
+    
     const removeElement = document.createElement('div');
     removeElement.classList = "absolute right-0 top-0 cursor-pointer";
 
@@ -107,7 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
                                     uuid: selected.file.uuid,
                                     url: {
                                         cdn: selected.file.url.cdn
-                                    }
+                                    },
+                                    type: selected.file.type
                                 }
                             }
                             
