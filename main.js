@@ -88,18 +88,26 @@ document.addEventListener("DOMContentLoaded", function () {
                     },
                     target: '#filerobotWidget',
                     inline: true,
-                    width: "100%",
-                    height: "100%",
-                    disableDownloadButton: true,
+                    inline: true,
+                    width: '100%',
+                    height: '100%',
+                    resetAfterClose: true,
+                    disableExportButton: false, // default: false, if the page name = filerobot-fmaw the value is true
+                    hideExportButtonIcon: true,
+                    preventExportDefaultBehavior: true,
+                    disableDownloadButton: false,
                     hideDownloadButtonIcon: true,
                     preventDownloadDefaultBehavior: true,
-                    resetAfterClose: true,
-                     // reference https://github.com/scaleflex/commercetools-filerobot-plugin/blob/master/src/components/filerobot/filerobot-dam.jsx
-                     locale: {
+                    noImgOperationsAndDownload: true, // default: false, if the page name = filerobot-fmaw the value is true
+                    hideDownloadTransformationOption: true,
+                    disableFileResolutionFallback: true,
+                    showFoldersTree: false,
+                    defaultFieldKeyOfBulkEditPanel: 'title',
+                    locale: {
                         strings: {
                             mutualizedExportButtonLabel: 'Insert',
                             mutualizedDownloadButton: 'Insert',
-                        }
+                        },
                     },
                 })
                 .use(XHRUpload)
@@ -146,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (token && secTemplate) {
                 if (files) {
-                    kontentStoredAssets = files;
+                    kontentStoredAssets = files.filter(function(file) { return file.hasOwnProperty('file') });
                 } else {
                     kontentStoredAssets = [];
                 }
